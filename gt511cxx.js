@@ -329,6 +329,39 @@ GT511CXX.prototype.open = function(extraInfo) {
 
     return this.protocol.sendCmd(Protocol.C.COMMAND.OPEN);
 };
+GT511CXX.prototype.enroll = function(id) {
+    let open = () => this.open(),
+        close = () => this.close(),
+        start = () => this.enrollStart(id),
+        capture = () => this.captureFinger(true),
+        waitFinger = () => this.waitFinger(10000, false),
+        waitReleaseFinger = () => this.waitFinger(10000, true),
+        led = (b) => () => this.switchLED(!!b),
+        enroll1 = () => this.enroll1(),
+        enroll2 = () => this.enroll2(),
+        enroll3 = () => this.enroll3(),
+        log = (s) => () => Promise.resolve(console.log(s)),
+        enrollDelay = () => new Promise(resolve => setTimeout(resolve, 500)),
+        blinkDelay = () => new Promise(resolve => setTimeout(resolve, 100));
+
+    return new Promise((resolve, reject) => {
+        let errorHandler = err => !console.log('enroll error: ', err) && !led(0) && !close() && reject(err),
+            successHandler = () => !close() && !console.log('enroll success') && resolve();
+
+        GT511CXX.sequence([
+            open, led(1),
+            log('press finger'), waitFinger, start,
+            capture, enroll1, log('enroll 1 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
+            enrollDelay,
+            log('press finger'), waitFinger,
+            capture, enroll2, log('enroll 2 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
+            enrollDelay,
+            log('press finger'), waitFinger,
+            capture, enroll3, log('enroll 3 done'), led(0),
+            close
+        ]).then(successHandler).catch(errorHandler);
+    });
+};
 
 GT511CXX.sequence = fs => fs.reduce((prm, fn) => prm.then(res => fn().then(res.concat.bind(res))), Promise.resolve([]));
 
