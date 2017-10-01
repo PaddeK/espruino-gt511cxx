@@ -330,30 +330,30 @@ GT511CXX.prototype.open = function(extraInfo) {
     return this.protocol.sendCmd(Protocol.C.COMMAND.OPEN);
 };
 GT511CXX.prototype.enroll = function(id) {
-    let open = () => this.open(),
-        start = () => this.enrollStart(id),
-        capture = () => this.captureFinger(true),
-        waitFinger = () => this.waitFinger(10000, false),
-        waitReleaseFinger = () => this.waitFinger(10000, true),
-        led = (b) => () => this.switchLED(!!b),
-        enroll1 = () => this.enroll1(),
-        enroll2 = () => this.enroll2(),
-        enroll3 = () => this.enroll3(),
-        log = (s) => () => Promise.resolve(console.log(s)),
-        enrollDelay = () => new Promise(resolve => setTimeout(resolve, 500)),
-        blinkDelay = () => new Promise(resolve => setTimeout(resolve, 100));
-
     return new Promise((resolve, reject) => {
+        let open = () => this.open(),
+            start = () => this.enrollStart(id),
+            capture = () => this.captureFinger(true),
+            waitFinger = () => this.waitFinger(10000, false),
+            waitReleaseFinger = () => this.waitFinger(10000, true),
+            led = (b) => () => this.switchLED(!!b),
+            enroll1 = () => this.enroll1(),
+            enroll2 = () => this.enroll2(),
+            enroll3 = () => this.enroll3(),
+            log = (s) => () => Promise.resolve(console.log(s)),
+            enrollDelay = () => new Promise(res => setTimeout(res, 500)),
+            blinkDelay = () => new Promise(res => setTimeout(res, 100));
+
         GT511CXX.sequence([
             open, led(1),
             log('press finger'), waitFinger, start,
-            capture, enroll1, log('enroll 1 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
+            capture, enroll1, log('enroll1 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
             enrollDelay,
             log('press finger'), waitFinger,
-            capture, enroll2, log('enroll 2 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
+            capture, enroll2, log('enroll2 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
             enrollDelay,
             log('press finger'), waitFinger,
-            capture, enroll3, log('enroll 3 done'), led(0)
+            capture, enroll3, log('enroll3 done'), led(0)
         ]).then(resolve).catch(err => led(0)().then(() => reject(err)).catch(reject));
     });
 };
