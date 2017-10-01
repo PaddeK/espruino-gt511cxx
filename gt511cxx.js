@@ -343,17 +343,19 @@ GT511CXX.prototype.enroll = function(id) {
         enrollDelay = () => new Promise(resolve => setTimeout(resolve, 500)),
         blinkDelay = () => new Promise(resolve => setTimeout(resolve, 100));
 
-    return GT511CXX.sequence([
-        open, led(1),
-        log('press finger'), waitFinger, start,
-        capture, enroll1, log('enroll 1 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
-        enrollDelay,
-        log('press finger'), waitFinger,
-        capture, enroll2, log('enroll 2 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
-        enrollDelay,
-        log('press finger'), waitFinger,
-        capture, enroll3, log('enroll 3 done'), led(0)
-    ]).catch(err => led(0));
+    return new Promise((resolve, reject) => {
+        GT511.sequence([
+            open, led(1),
+            log('press finger'), waitFinger, start,
+            capture, enroll1, log('enroll 1 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
+            enrollDelay,
+            log('press finger'), waitFinger,
+            capture, enroll2, log('enroll 2 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
+            enrollDelay,
+            log('press finger'), waitFinger,
+            capture, enroll3, log('enroll 3 done'), led(0)
+        ]).then(resolve).catch(err => led(0)().then(() => reject(err)).catch(reject));
+    });
 };
 
 GT511CXX.sequence = fs => fs.reduce((prm, fn) => prm.then(res => fn().then(res.concat.bind(res))), Promise.resolve([]));
