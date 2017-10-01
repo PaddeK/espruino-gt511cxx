@@ -344,7 +344,7 @@ GT511CXX.prototype.enroll = function(id) {
         blinkDelay = () => new Promise(resolve => setTimeout(resolve, 100));
 
     return new Promise((resolve, reject) => {
-        GT511.sequence([
+        GT511CXX.sequence([
             open, led(1),
             log('press finger'), waitFinger, start,
             capture, enroll1, log('enroll 1 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
