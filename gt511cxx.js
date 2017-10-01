@@ -212,6 +212,7 @@ GT511CXX = function (device, serial) {
 };
 
 GT511CXX.Devices = Devices;
+GT511CXX.Error = Protocol.C.ERROR;
 
 GT511CXX.prototype.close = function() {
     return this.protocol.sendCmd(Protocol.C.COMMAND.CLOSE);
