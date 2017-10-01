@@ -331,7 +331,6 @@ GT511CXX.prototype.open = function(extraInfo) {
 };
 GT511CXX.prototype.enroll = function(id) {
     let open = () => this.open(),
-        close = () => this.close(),
         start = () => this.enrollStart(id),
         capture = () => this.captureFinger(true),
         waitFinger = () => this.waitFinger(10000, false),
@@ -345,9 +344,6 @@ GT511CXX.prototype.enroll = function(id) {
         blinkDelay = () => new Promise(resolve => setTimeout(resolve, 100));
 
     return new Promise((resolve, reject) => {
-        let errorHandler = err => !console.log('enroll error: ', err) && !led(0) && !close() && reject(err),
-            successHandler = () => !close() && !console.log('enroll success') && resolve();
-
         GT511CXX.sequence([
             open, led(1),
             log('press finger'), waitFinger, start,
@@ -357,9 +353,15 @@ GT511CXX.prototype.enroll = function(id) {
             capture, enroll2, log('enroll 2 done'), led(0), blinkDelay, led(1), log('release finger'), waitReleaseFinger,
             enrollDelay,
             log('press finger'), waitFinger,
-            capture, enroll3, log('enroll 3 done'), led(0),
-            close
-        ]).then(successHandler).catch(errorHandler);
+            capture, enroll3, log('enroll 3 done'), led(0)
+        ]).then(() => {
+            console.log('enroll success');
+            resolve();
+        }).catch(error => {
+            led(0);
+            console.log('enroll error: ', err);
+            reject(err);
+        });
     });
 };
 
